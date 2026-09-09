@@ -1,0 +1,11 @@
+{% block sw_settings_snippet_list_column_value_content %}
+<template v-else>
+    <sw-label
+        v-if="item[set.id] && item[set.id].inherited"
+        size="small"
+        style="margin-right: 6px;"
+    >
+        {{ $t('scythe-snippet-set-inheritance.badge.inheritedFrom', { name: item[set.id].inheritedFromSnippetSetName }) }}
+    </sw-label>{{ item[set.id].value }}
+</template>
+{% endblock %}

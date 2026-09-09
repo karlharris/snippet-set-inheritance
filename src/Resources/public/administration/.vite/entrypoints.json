@@ -1,0 +1,25 @@
+{
+  "base": "/bundles/scythesnippetsetinheritance/administration/",
+  "entryPoints": {
+    "scythe-snippet-set-inheritance": {
+      "css": [
+        "/bundles/scythesnippetsetinheritance/administration/assets/scythe-snippet-set-inheritance-Rgpx2Hm6.css"
+      ],
+      "dynamic": [],
+      "js": [
+        "/bundles/scythesnippetsetinheritance/administration/assets/scythe-snippet-set-inheritance-B0CwXSq3.js"
+      ],
+      "legacy": false,
+      "preload": []
+    }
+  },
+  "legacy": false,
+  "metadatas": {},
+  "version": [
+    "7.1.0",
+    7,
+    1,
+    0
+  ],
+  "viteServer": null
+}

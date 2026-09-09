@@ -1,0 +1,8 @@
+.sw-settings-snippet-detail {
+    // Our hint text ("Inherited from \"<set>\"") is longer than the core
+    // "Original" label; keep it on one line.
+    &__translation-original-label {
+        display: inline-block;
+        white-space: nowrap;
+    }
+}

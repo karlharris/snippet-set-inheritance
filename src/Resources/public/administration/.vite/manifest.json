@@ -1,0 +1,11 @@
+{
+  "main.js": {
+    "file": "assets/scythe-snippet-set-inheritance-B0CwXSq3.js",
+    "name": "scythe-snippet-set-inheritance",
+    "src": "main.js",
+    "isEntry": true,
+    "css": [
+      "assets/scythe-snippet-set-inheritance-Rgpx2Hm6.css"
+    ]
+  }
+}

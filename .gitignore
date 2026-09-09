@@ -1,0 +1,16 @@
+# Test cache
+/.phpunit.cache/
+/phpunit.xml
+
+# Local dependencies (plugin declares only shopware/core; installed via the shop's vendor/)
+/vendor/
+/composer.lock
+
+# Editor / OS
+/.idea/
+/.vscode/
+.DS_Store
+
+# NOTE: src/Resources/public/ (compiled administration assets) IS committed on
+# purpose so the plugin can be installed in any shop without an admin build.
+# Regenerate with `bin/build-administration.sh` after changing admin sources.

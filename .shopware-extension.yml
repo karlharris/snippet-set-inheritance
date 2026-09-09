@@ -1,0 +1,16 @@
+# Configuration for `shopware-cli extension` (build / validate / zip).
+# https://sw-cli.fos.gg/
+build:
+    zip:
+        assets:
+            # Admin assets are committed under src/Resources/public, so no build
+            # is needed at package time. Flip to true if that ever changes.
+            enabled: false
+        pack:
+            excludes:
+                paths:
+                    - .gitignore
+                    - .shopware-extension.yml
+                    - .phpunit.cache
+                    - phpunit.xml.dist
+                    - tests

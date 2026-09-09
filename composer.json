@@ -1,0 +1,36 @@
+{
+    "name": "scythe/snippet-set-inheritance",
+    "description": "Dynamic inheritance of translation snippets between freely selectable Shopware snippet sets.",
+    "version": "0.1.0",
+    "type": "shopware-platform-plugin",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Scythe"
+        }
+    ],
+    "require": {
+        "shopware/core": "~6.7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Scythe\\SnippetSetInheritance\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Scythe\\SnippetSetInheritance\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "shopware-plugin-class": "Scythe\\SnippetSetInheritance\\ScytheSnippetSetInheritance",
+        "label": {
+            "de-DE": "Scythe Snippet-Set-Vererbung",
+            "en-GB": "Scythe Snippet Set Inheritance"
+        },
+        "description": {
+            "de-DE": "Erweitert Snippetsets um ein frei wählbares Eltern-Set: nicht gepflegte Textbausteine übernehmen dynamisch den effektiven Wert des Eltern-Sets (rekursiv), danach den eines konfigurierbaren System-Fallback-Sets, erst dann die eigene Basisdatei. Live in Administration und Storefront, mit Zyklenschutz und automatischer Cache-Invalidierung.",
+            "en-GB": "Adds a freely selectable parent set to snippet sets: unmaintained snippets dynamically inherit the effective value of the parent set (recursively), then of a configurable system fallback set, before the set's own base file. Live in the Administration and the Storefront, with cycle protection and automatic cache invalidation."
+        }
+    }
+}

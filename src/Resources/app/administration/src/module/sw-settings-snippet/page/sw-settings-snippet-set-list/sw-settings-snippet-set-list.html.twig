@@ -1,0 +1,123 @@
+{% block sw_settings_snippet_set_list_card_list_grid %}
+<template #grid>
+    <div class="sw-settings-snippet-set-list__container">
+        <sw-entity-listing
+            v-if="snippetSets.length"
+            ref="snippetSetList"
+            class="sw-snippet-set-list__list"
+            identifier="sw-snippet-set-list"
+            :data-source="snippetSets"
+            :columns="snippetSetColumns"
+            :repository="snippetSetRepository"
+            large
+            show-settings
+            show-selection
+            allow-bulk-edit
+            :allow-edit="acl.can('snippet.editor')"
+            :allow-delete="acl.can('snippet.deleter')"
+            :allow-inline-edit="acl.can('snippet.editor')"
+            :skeleton-item-amount="5"
+            :sort-by="sortBy"
+            :sort-direction="sortDirection"
+            @selection-change="onSelectionChanged"
+            @bulk-edit-modal-open="onEditSnippetSets"
+        >
+            <template #column-name="{ item, isInlineEdit }">
+                <router-link
+                    v-if="!isInlineEdit"
+                    class="sw-settings-snippet-set__column-name"
+                    :to="{ name: 'sw.settings.snippet.list', query: { ids: [item.id] } }"
+                >
+                    {{ item.name }}
+                </router-link>
+                <template v-else>
+                    <mt-text-field
+                        v-model="item.name"
+                        class="sw-settings-snippet-set__column-name"
+                        :placeholder="$t('sw-settings-snippet.setList.placeholderName')"
+                        size="small"
+                    />
+                </template>
+            </template>
+
+            <template #column-updatedAt="{ item }">
+                <template v-if="item.updatedAt">
+                    <sw-time-ago :date="item.updatedAt" />
+                </template>
+                <template v-else>
+                    <sw-time-ago :date="item.createdAt" />
+                </template>
+            </template>
+
+            <template #column-baseFile="{ item, isInlineEdit, compact }">
+                <template v-if="!isInlineEdit">
+                    {{ item.baseFile }}
+                </template>
+                <mt-select
+                    v-else
+                    v-model="item.baseFile"
+                    class="sw-settings-snippet-set__column-base-file"
+                    :options="baseFileOptions"
+                    :placeholder="$t('sw-settings-snippet.setList.placeholderBaseFile')"
+                    :small="compact"
+                />
+            </template>
+
+            {% block sw_settings_snippet_set_list_card_list_grid_column_parent %}
+            <template #column-parentId="{ item, isInlineEdit }">
+                <template v-if="!isInlineEdit">
+                    {{ scytheParentSetName(item) }}
+                </template>
+                <sw-entity-single-select
+                    v-else
+                    v-model:value="item.parentId"
+                    class="scythe-snippet-set__column-parent"
+                    entity="snippet_set"
+                    size="small"
+                    show-clearable-button
+                    :criteria="scytheParentSetCriteria(item)"
+                    :placeholder="$t('scythe-snippet-set-inheritance.setList.parentPlaceholder')"
+                />
+            </template>
+            {% endblock %}
+
+            <template #actions="{ item }">
+                <sw-context-menu-item
+                    class="sw-snippet-set-list__list-context-edit"
+                    :router-link="{ name: 'sw.settings.snippet.list', query: { ids: [item.id] } }"
+                >
+                    {{ contextMenuEditSnippet }}
+                </sw-context-menu-item>
+
+                <sw-context-menu-item
+                    class="sw-snippet-set-list__list-context-clone"
+                    :disabled="!acl.can('snippet.creator')"
+                    @click="onConfirmClone(item.id)"
+                >
+                    {{ $t('global.default.duplicate') }}
+                </sw-context-menu-item>
+
+                <sw-context-menu-item
+                    class="sw-snippet-set-list__list-context-delete"
+                    variant="danger"
+                    :disabled="!acl.can('snippet.deleter')"
+                    @click="onDeleteSet(item.id)"
+                >
+                    {{ $t('global.default.delete') }}
+                </sw-context-menu-item>
+            </template>
+
+            <template #action-modals="{ item }">
+                <sw-confirm-modal
+                    v-if="showDeleteModal === item.id"
+                    type="delete"
+                    :text="$t('sw-settings-snippet.setList.textDeleteConfirm', { name: item.name })"
+                    @confirm="onConfirmDelete"
+                    @cancel="closeDeleteModal"
+                    @close="closeDeleteModal"
+                />
+            </template>
+        </sw-entity-listing>
+    </div>
+</template>
+{% endblock %}

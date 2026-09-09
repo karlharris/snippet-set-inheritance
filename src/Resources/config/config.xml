@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="https://raw.githubusercontent.com/shopware/shopware/trunk/src/Core/System/SystemConfig/Schema/config.xsd">
+    <card>
+        <title>Snippet set inheritance</title>
+        <title lang="de-DE">Snippet-Set-Vererbung</title>
+
+        <component name="sw-entity-single-select">
+            <name>fallbackSnippetSetId</name>
+            <entity>snippet_set</entity>
+            <label>Default snippet set (system language fallback)</label>
+            <label lang="de-DE">Standard-Snippetset (Fallback Systemsprache)</label>
+            <helpText>Used as stage 3 of the inheritance chain for every snippet set that does not resolve a value from its own parent chain. Leave empty to disable this stage.</helpText>
+            <helpText lang="de-DE">Wird als Stufe 3 der Vererbungskette für jedes Snippetset verwendet, das über seine eigene Eltern-Kette keinen Wert findet. Leer lassen, um diese Stufe zu deaktivieren.</helpText>
+        </component>
+
+        <input-field type="int">
+            <name>maxInheritanceDepth</name>
+            <label>Maximum inheritance depth</label>
+            <label lang="de-DE">Maximale Vererbungstiefe</label>
+            <helpText>Hard cap on how many parent levels are traversed. Cycles are prevented on save regardless of this value.</helpText>
+            <helpText lang="de-DE">Harte Obergrenze, wie viele Eltern-Ebenen durchlaufen werden. Zyklen werden unabhängig von diesem Wert bereits beim Speichern verhindert.</helpText>
+            <defaultValue>10</defaultValue>
+            <min>1</min>
+            <max>100</max>
+        </input-field>
+    </card>
+</config>

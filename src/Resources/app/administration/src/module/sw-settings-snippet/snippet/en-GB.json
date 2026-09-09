@@ -1,0 +1,12 @@
+{
+    "scythe-snippet-set-inheritance": {
+        "setList": {
+            "columnParent": "Parent set (inherit from)",
+            "parentPlaceholder": "No parent set",
+            "selfExcludedHint": "A set cannot inherit from itself."
+        },
+        "badge": {
+            "inheritedFrom": "Inherited from \"{name}\""
+        }
+    }
+}

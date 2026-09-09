@@ -1,0 +1,12 @@
+{
+    "scythe-snippet-set-inheritance": {
+        "setList": {
+            "columnParent": "Eltern-Set (Vererbung von)",
+            "parentPlaceholder": "Kein Eltern-Set",
+            "selfExcludedHint": "Ein Set kann nicht von sich selbst erben."
+        },
+        "badge": {
+            "inheritedFrom": "Geerbt von \"{name}\""
+        }
+    }
+}
