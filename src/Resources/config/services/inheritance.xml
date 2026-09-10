@@ -13,5 +13,9 @@
             <argument type="service" id="Doctrine\DBAL\Connection"/>
             <argument type="service" id="Scythe\SnippetSetInheritance\Config\PluginConfig"/>
         </service>
+
+        <service id="Scythe\SnippetSetInheritance\Inheritance\SnippetInheritanceMerger">
+            <argument type="service" id="Scythe\SnippetSetInheritance\Inheritance\SnippetInheritanceResolver"/>
+        </service>
     </services>
 </container>

@@ -13,8 +13,8 @@ order:
 
 1. The set's own maintained value (unchanged core behaviour).
 2. The effective value of its **parent set**, resolved recursively along the
-   whole parent chain — a maintained (DB) value of the nearest ancestor first,
-   then a base-file value of the nearest ancestor.
+   whole parent chain. A maintained value anywhere up the chain always wins over
+   any base-file value; a parent's own base file wins over the child's.
 3. The effective value of the configured **system fallback set** (plugin
    configuration).
 4. The set's own **base file** (unchanged core behaviour).
@@ -71,8 +71,11 @@ single-key editor):
   Storefront that means only on a cache miss, so there is no per-request or
   per-snippet cost. Deep chains cost one extra catalog build per ancestor on
   that cache miss.
-- **Core coupling.** The plugin decorates `Shopware\Core\System\Snippet\SnippetService`
-  and overrides three `sw-settings-snippet` Administration templates. Re-test
+- **Core coupling.** No core service is decorated. The storefront hooks the
+  official `storefront.snippets.post` extension point; the Administration calls a
+  plugin-owned API route (`POST /api/_action/scythe-snippet-set/list`) via a
+  small `snippetSetService` decorator, and three `sw-settings-snippet` components
+  are overridden (parent-set column + badge). Re-test the component overrides
   after every Shopware minor update.
 - **Rebuild after admin changes.** The compiled Administration assets in
   `src/Resources/public/` are committed. Run `bin/build-administration.sh` and
@@ -89,8 +92,9 @@ dropped again.
 
 ## Install
 
+Place the plugin in `custom/plugins/ScytheSnippetSetInheritance/`, then:
+
 ```
-composer require scythe/snippet-set-inheritance
 bin/console plugin:refresh
 bin/console plugin:install --activate ScytheSnippetSetInheritance
 bin/console assets:install
@@ -98,7 +102,9 @@ bin/console cache:clear
 ```
 
 The migration adds `snippet_set.parent_id` automatically on install, including
-for snippet sets that already existed.
+for snippet sets that already existed. It is a filesystem plugin — do **not**
+add it to the shop's root `composer.json`; `bin/console plugin:update` then
+handles version bumps normally.
 
 ## Tests
 
@@ -106,7 +112,8 @@ for snippet sets that already existed.
 vendor/bin/phpunit -c custom/plugins/ScytheSnippetSetInheritance/phpunit.xml.dist
 ```
 
-Unit tests cover the inheritance resolver (chain, cycle detection, depth) and the
-`SnippetService` decorator (priority order, multi-level chains, badge metadata);
-integration tests cover the entity extension, the write validation and the real
-Storefront catalog path.
+Unit tests cover the inheritance resolver (chain, cycle detection, depth), the
+storefront subscriber (priority order, recursion, fallback set) and the admin
+merger (badge metadata, reset target). Integration tests cover the entity
+extension, the write validation, the real storefront catalog path and the admin
+API route.

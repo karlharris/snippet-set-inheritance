@@ -1,9 +1,13 @@
 <?php declare(strict_types=1);
 
-// Boots against the shop's shared vendor/ (the plugin is installed via a
-// Composer path repository, not standalone). Shared by pure unit tests
-// (mocked collaborators, no DB) and integration tests (real Shopware kernel
-// + isolated `<database>_test` schema handled by `TestBootstrapper`).
+// Boots against the shop's shared vendor/. The plugin is a plain filesystem
+// plugin under custom/plugins/ — TestBootstrapper discovers and installs it,
+// and DbalKernelPluginLoader registers its namespace from the plugin DB row.
+// Shared by pure unit tests (mocked collaborators, no DB) and integration
+// tests (real Shopware kernel + isolated `<database>_test` schema).
+//
+// If a run fails with "No source registered for ScytheSnippetSetInheritance",
+// a stale compiled test container is the cause: `rm -rf var/cache/*test*`.
 require dirname(__DIR__, 4) . '/vendor/autoload.php';
 
 (new Shopware\Core\TestBootstrapper())

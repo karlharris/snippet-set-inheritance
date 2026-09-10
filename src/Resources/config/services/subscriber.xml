@@ -5,6 +5,14 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <service id="Scythe\SnippetSetInheritance\Subscriber\StorefrontSnippetsSubscriber">
+            <argument type="service" id="Shopware\Core\System\Snippet\SnippetService"/>
+            <argument type="service" id="Scythe\SnippetSetInheritance\Inheritance\SnippetInheritanceResolver"/>
+            <argument type="service" id="Scythe\SnippetSetInheritance\Config\PluginConfig"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
         <service id="Scythe\SnippetSetInheritance\Subscriber\SnippetSetWriteValidationSubscriber">
             <argument type="service" id="Scythe\SnippetSetInheritance\Inheritance\SnippetInheritanceResolver"/>
             <tag name="kernel.event_subscriber"/>

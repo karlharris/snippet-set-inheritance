@@ -4,23 +4,27 @@ namespace Scythe\SnippetSetInheritance\Tests\Integration;
 
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
+use Scythe\SnippetSetInheritance\Core\System\Snippet\Api\SnippetInheritanceController;
+use Scythe\SnippetSetInheritance\Inheritance\SnippetInheritanceMerger;
 use Scythe\SnippetSetInheritance\Inheritance\SnippetInheritanceResolver;
 use Scythe\SnippetSetInheritance\Subscriber\SnippetInheritanceCacheInvalidationSubscriber;
 use Scythe\SnippetSetInheritance\Subscriber\SnippetSetWriteValidationSubscriber;
+use Scythe\SnippetSetInheritance\Subscriber\StorefrontSnippetsSubscriber;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\DataAbstractionLayer\Write\WriteException;
+use Shopware\Core\Framework\Test\TestCaseBase\IntegrationTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Framework\Validation\WriteConstraintViolationException;
 use Shopware\Core\System\Snippet\SnippetService;
 use Symfony\Component\Translation\MessageCatalogue;
 
 /**
- * End-to-end wiring: the `EntityExtension` really persists `parentId`, the
- * resolver reads the graph back, and the validation subscriber blocks
- * self-references / cycles on the real DAL write path.
+ * End-to-end wiring: the `EntityExtension` persists `parentId`, the resolver
+ * reads the graph back, the validation subscriber blocks self-references /
+ * cycles on the real DAL write path, the `storefront.snippets.post` subscriber
+ * resolves the storefront catalog, and the admin merger enriches the list.
  */
 #[CoversNothing]
 class SnippetSetInheritanceIntegrationTest extends TestCase
@@ -42,17 +46,23 @@ class SnippetSetInheritanceIntegrationTest extends TestCase
 
     public function testServicesAreRegistered(): void
     {
-        static::assertInstanceOf(
+        foreach ([
             SnippetInheritanceResolver::class,
-            static::getContainer()->get(SnippetInheritanceResolver::class)
-        );
-        static::assertInstanceOf(
+            SnippetInheritanceMerger::class,
             SnippetInheritanceCacheInvalidationSubscriber::class,
-            static::getContainer()->get(SnippetInheritanceCacheInvalidationSubscriber::class)
-        );
-        static::assertInstanceOf(
             SnippetSetWriteValidationSubscriber::class,
-            static::getContainer()->get(SnippetSetWriteValidationSubscriber::class)
+            StorefrontSnippetsSubscriber::class,
+            SnippetInheritanceController::class,
+        ] as $serviceId) {
+            static::assertInstanceOf($serviceId, static::getContainer()->get($serviceId));
+        }
+    }
+
+    public function testSnippetServiceIsNotDecorated(): void
+    {
+        static::assertSame(
+            SnippetService::class,
+            static::getContainer()->get(SnippetService::class)::class
         );
     }
 
@@ -118,17 +128,20 @@ class SnippetSetInheritanceIntegrationTest extends TestCase
         static::assertNull($this->resolver->getParentId($childId));
     }
 
-    public function testStorefrontCatalogInheritsFromParentThroughTheDecorator(): void
+    public function testStorefrontCatalogInheritsThroughTheEventSubscriber(): void
     {
-        $parentId = $this->createSnippetSet('SSSI storefront parent');
+        $grandParentId = $this->createSnippetSet('SSSI storefront grandparent');
+        $parentId = $this->createSnippetSet('SSSI storefront parent', $grandParentId);
         $childId = $this->createSnippetSet('SSSI storefront child', $parentId);
 
         $key = 'scythe.sssi.test.' . Uuid::randomHex();
 
+        // Only the grandparent maintains the key -> the child inherits it through
+        // the (unmaintained) parent, exercising real recursion.
         static::getContainer()->get('snippet.repository')->create([[
             'translationKey' => $key,
-            'value' => 'value from parent',
-            'setId' => $parentId,
+            'value' => 'value from grandparent',
+            'setId' => $grandParentId,
             'author' => 'test',
         ]], $this->context);
 
@@ -136,7 +149,7 @@ class SnippetSetInheritanceIntegrationTest extends TestCase
         $snippetService = static::getContainer()->get(SnippetService::class);
 
         $childCatalog = $snippetService->getStorefrontSnippets(new MessageCatalogue('en-GB'), $childId, 'en');
-        static::assertSame('value from parent', $childCatalog[$key] ?? null);
+        static::assertSame('value from grandparent', $childCatalog[$key] ?? null);
 
         // A maintained value in the child must win over the inherited one.
         static::getContainer()->get('snippet.repository')->create([[
@@ -150,7 +163,7 @@ class SnippetSetInheritanceIntegrationTest extends TestCase
         static::assertSame('value from child', $childCatalog[$key] ?? null);
     }
 
-    public function testAdminListingReportsInheritedOriginForAnOverriddenChildSnippet(): void
+    public function testAdminListMergerReportsInheritedOriginForAnOverriddenChildSnippet(): void
     {
         // Parent maintains "5555", child overrides with "6666" — the editor's
         // "Original" must be the inherited "5555", not the base-file default.
@@ -166,7 +179,12 @@ class SnippetSetInheritanceIntegrationTest extends TestCase
 
         /** @var SnippetService $snippetService */
         $snippetService = static::getContainer()->get(SnippetService::class);
-        $list = $snippetService->getList(1, 100, $this->context, ['term' => $key], []);
+        /** @var SnippetInheritanceMerger $merger */
+        $merger = static::getContainer()->get(SnippetInheritanceMerger::class);
+
+        $list = $merger->enrichAdminList(
+            $snippetService->getList(1, 100, $this->context, ['term' => $key], [])
+        );
 
         $childCell = null;
         foreach ($list['data'][$key] ?? [] as $cell) {

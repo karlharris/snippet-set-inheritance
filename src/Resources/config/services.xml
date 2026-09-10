@@ -7,7 +7,7 @@
     <imports>
         <import resource="services/extension.xml"/>
         <import resource="services/inheritance.xml"/>
-        <import resource="services/decorator.xml"/>
         <import resource="services/subscriber.xml"/>
+        <import resource="services/api.xml"/>
     </imports>
 </container>
